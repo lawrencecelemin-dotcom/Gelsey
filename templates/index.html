@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Valentine 💖</title>
+<style>
+body {
+  font-family: system-ui, sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  margin: 0;
+  background: #ffc0cb;
+}
+
+.card {
+  background: white;
+  padding: 2rem;
+  border-radius: 20px;
+  text-align: center;
+  z-index: 10;
+}
+
+.buttons {
+  position: relative;
+  height: 120px;
+  margin-top: 1.5rem;
+}
+
+button {
+  font-size: 1.2rem;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.yes {
+  background: #ff4d6d;
+  color: white;
+}
+
+.no {
+  background: #ddd;
+  position: absolute;
+}
+
+.message {
+  font-size: 1.3rem;
+  margin-top: 1rem;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+{% if answer == "yes" %}
+  <h1>💖 YAY 💖</h1>
+  <p class="message">
+    You just made me the happiest person ever.<br>
+    Happy Valentine’s Day, my Gelsey ❤️
+  </p>
+{% else %}
+  <h1>Will you be my Valentine? 💌</h1>
+  <form method="POST">
+    <div class="buttons">
+      <button class="yes" name="answer" value="yes" type="submit">Yes 💕</button>
+      <button type="button" class="no" id="noButton">No 🙃</button>
+    </div>
+  </form>
+{% endif %}
+</div>
+
+<!-- Optional MP3: only plays on button click to avoid autoplay issues -->
+<audio id="bgMusic" preload="auto">
+  <source src="{{ url_for('static', filename='love.mp3') }}" type="audio/mpeg">
+</audio>
+
+<!-- Confetti library -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<script>
+const music = document.getElementById("bgMusic");
+const noButton = document.getElementById("noButton");
+let noClicks = 0;
+const MAX_CLICKS = 5;
+
+function fireConfetti() {
+  confetti({
+    particleCount: 25,
+    spread: 360,
+    startVelocity: 45,
+    gravity: 0.9,
+    shapes: [confetti.shapeFromText({ text: "❤️" })],
+    origin: { x: Math.random(), y: Math.random() * 0.6 }
+  });
+}
+
+function startConfetti() {
+  setInterval(fireConfetti, 666);
+}
+
+// Play song safely when user clicks "Yes"
+document.querySelector(".yes")?.addEventListener("click", () => {
+  try {
+    music.currentTime = 33;
+    music.volume = 0.85;
+    music.play().catch(() => console.log("Autoplay blocked"));
+    startConfetti();
+  } catch (e) {
+    console.log("Audio/Confetti failed", e);
+  }
+});
+
+// NO button logic
+if (noButton) {
+  noButton.addEventListener("mouseover", moveButton);
+  noButton.addEventListener("click", handleNo);
+
+  function handleNo() {
+    noClicks++;
+    if (noClicks >= MAX_CLICKS) {
+      noButton.textContent = "Yes 💕";
+      noButton.className = "yes";
+      noButton.style.position = "static";
+      noButton.style.transform = "none";
+      noButton.onclick = () => document.querySelector(".yes").click();
+    } else {
+      moveButton();
+    }
+  }
+
+  function moveButton() {
+    const x = Math.random() * 220 - 110;
+    const y = Math.random() * 120 - 60;
+    noButton.style.transform = `translate(${x}px, ${y}px)`;
+  }
+}
+</script>
+
+</body>
+</html>
